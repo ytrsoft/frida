@@ -34,11 +34,7 @@ class Dispatcher:
 
     def image(self, id):
       result = self.momo.exports_sync.image(id)
-<<<<<<< HEAD
       return image(result)
-=======
-      return load_image(result)
->>>>>>> ab28b9c5d1a65d7d904f4b760e00fa16d5e970a2
 
     def __rpc_message__(self, body):
       payload = body['payload']
