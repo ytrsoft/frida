@@ -3,7 +3,7 @@ import urllib.parse
 from rpc import rpc
 from mq import MQueueManager
 from gpt import Message, MomoGPT
-from utils import SSEMessage6, message_to
+from utils import SSEMessage, message_to
 
 curr_momoid = '976807129'
 
@@ -34,7 +34,11 @@ class Dispatcher:
 
     def image(self, id):
       result = self.momo.exports_sync.image(id)
+<<<<<<< HEAD
       return image(result)
+=======
+      return load_image(result)
+>>>>>>> ab28b9c5d1a65d7d904f4b760e00fa16d5e970a2
 
     def __rpc_message__(self, body):
       payload = body['payload']
