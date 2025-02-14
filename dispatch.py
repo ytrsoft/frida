@@ -1,16 +1,18 @@
 import asyncio
-import urllib.parse
 from rpc import rpc
 from mq import MQueueManager
 from gpt import Message, MomoGPT
 from utils import SSEMessage, message_to
 
-curr_momoid = '976807129'
+def concat(s: str):
+    if not s or len(s) < 4:
+        return ""
+    return f"/{s[:2]}/{s[2:4]}/"
 
 def image(str):
     if not str or len(str) <= 3:
         return ""
-    return f"https://img.momocdn.com/album{urllib.parse.quote(str)}{str}_L.jpg"
+    return f"https://img.momocdn.com/album{concat(str)}{str}_L.jpg"
 
 class Dispatcher:
     def __init__(self, maxsize: int):
@@ -33,22 +35,22 @@ class Dispatcher:
           return SSEMessage(payload=takes)
 
     def image(self, id):
-      result = self.momo.exports_sync.image(id)
-      return image(result)
+      return image(id)
 
     def __rpc_message__(self, body):
+      # print(body)
       payload = body['payload']
       self.mq.rpc_put(str(payload))
-      if 'momoid' in payload:
-        from_id = payload['momoid']
-        to_id = payload['remoteUser']['momoid']
-        if from_id == curr_momoid:
-          gpt_message = Message(
-            momo_id=from_id,
-            remote_id=to_id,
-            content=payload['content']
-          )
-          self.mq.gpt_put(gpt_message)
+      # if 'momoid' in payload:
+      #   from_id = payload['momoid']
+      #   to_id = payload['fromId']
+      #   if from_id == curr_momoid:
+      #     gpt_message = Message(
+      #       momo_id=from_id,
+      #       remote_id=to_id,
+      #       content=payload['content']
+      #     )
+      #     self.mq.gpt_put(body['payload'])
 
     def receive(self):
       self.momo.on(
@@ -56,6 +58,9 @@ class Dispatcher:
          lambda body, _: self.__rpc_message__(body)
       )
       self.momo.exports_sync.receive()
+
+    def post(self, message):
+      self.momo.exports_sync.post(message)
 
     def __gpt_message__(self, message):
       message_to(message)
