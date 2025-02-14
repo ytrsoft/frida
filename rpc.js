@@ -70,23 +70,28 @@ const parseUserProfile = (profile) => {
 }
 
 const getUserProfile = (id) => {
+  if (!id) return {}
   const body = postRequest(USER_API, { remoteid: id })
   const json = JSON.parse(body || '{}')
   return parseUserProfile(json.data?.profile || {})
 }
 
 const cacheUserInfo = (msg) => {
-  const { mode, sendId } = msg
+  const { mode, fromId } = msg
   if (mode === 0) {
     msg.avatar = currentUser.photos[0]
     msg.name = currentUser.name
+    msg.constellation = currentUser.constellation
   } else {
-    if (!userCache[sendId]) {
-      userCache[sendId] = getUserProfile(sendId)
+    if (!userCache[fromId]) {
+      userCache[fromId] = getUserProfile(fromId)
     }
-    msg.avatar = userCache[sendId]?.photos[0]
-    msg.name = userCache[sendId]?.name
-    msg.sex = userCache[sendId]?.sex
+    const photos = userCache[fromId]?.photos
+    msg.avatar = photos && photos[0]
+    msg.name = userCache[fromId]?.name
+    msg.sex = userCache[fromId]?.sex
+    msg.device = userCache[fromId]?.device
+    msg.constellation = userCache[fromId]?.constellation
   }
 }
 
@@ -110,13 +115,15 @@ const receiveMessage = (callback) => {
       msgType: args.contentType.value,
       distance: args.distance.value,
       content: args.content.value,
-      sendId: args?.owner?.value?.getId(),
+      toId: args.myMomoId.value,
+      fromId: args?.owner?.value?.getId(),
       mode: (args?.owner?.value?.getId() === currentUser.id) ? 0 : 1
     }
-
-    cacheUserInfo(message)
-    messageHistory.push(message)
-    callback(message)
+    if (message.msgType == 0) {
+      cacheUserInfo(message)
+      messageHistory.push(message)
+      callback(message)
+    }
     return this.a(args)
   }
 }

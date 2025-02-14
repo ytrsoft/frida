@@ -38,19 +38,16 @@ class Dispatcher:
       return image(id)
 
     def __rpc_message__(self, body):
-      # print(body)
       payload = body['payload']
       self.mq.rpc_put(str(payload))
-      # if 'momoid' in payload:
-      #   from_id = payload['momoid']
-      #   to_id = payload['fromId']
-      #   if from_id == curr_momoid:
-      #     gpt_message = Message(
-      #       momo_id=from_id,
-      #       remote_id=to_id,
-      #       content=payload['content']
-      #     )
-      #     self.mq.gpt_put(body['payload'])
+      msg = payload['currentMsg']
+      if (msg['mode'] == 1):
+        gpt_message = Message(
+          momo_id=msg['fromId'],
+          remote_id=msg['toId'],
+          content=msg['content']
+        )
+        self.mq.gpt_put(gpt_message)
 
     def receive(self):
       self.momo.on(

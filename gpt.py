@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 import http.client
 import json
-import threading
 
 def str_json(data):
     return json.dumps(data, ensure_ascii=False, indent=4)
