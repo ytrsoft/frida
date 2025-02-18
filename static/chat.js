@@ -86,16 +86,14 @@ new Vue({
         this.onMsgNextHandle(data)
       }
     },
-    onMessageReplay(replayList) {
-      replayList.forEach((replay) => {
-        message = {
-          remoteUser: this.user,
-          content: replay
-        }
-        this.$nextTick(() => {
-          this.chats.push(message)
-          this.scrollToBottom()
-        })
+    onMessageReplay(content) {
+      message = {
+        remoteUser: this.user,
+        content: content
+      }
+      this.$nextTick(() => {
+        this.chats.push(message)
+        this.scrollToBottom()
       })
     },
     onMsgNextHandle(message) {
