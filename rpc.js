@@ -116,6 +116,8 @@ const handleMesage = (message, handle) => {
     id: json.msgId,
     distance: json.distance,
     content: json.content,
+    fromId: json.remoteId,
+    toId: json.myMomoId,
     type: Number(json.contentType)
   }
   // 只有文本模式才回传

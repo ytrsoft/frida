@@ -2,6 +2,7 @@ const MSG_TYPES = {
   INIT: 0,
   MESSAGE: 1,
   POST: 2,
+  REPLAY: 3,
 }
 
 const createWS = (handle) => {
@@ -51,8 +52,6 @@ new Vue({
     },
     sendMsg() {
       const content = this.$refs.content.value
-      const p = this;
-      debugger
       if (content && this.ws && this.selectId && this.user) {
         const message = {
           content,
@@ -81,9 +80,23 @@ new Vue({
     onMsgHandle({ type, data }) {
       if (type === MSG_TYPES.INIT) {
         this.user = data
+      } else if (type === MSG_TYPES.REPLAY) {
+        this.onMessageReplay(data)
       } else {
         this.onMsgNextHandle(data)
       }
+    },
+    onMessageReplay(replayList) {
+      replayList.forEach((replay) => {
+        message = {
+          remoteUser: this.user,
+          content: replay
+        }
+        this.$nextTick(() => {
+          this.chats.push(message)
+          this.scrollToBottom()
+        })
+      })
     },
     onMsgNextHandle(message) {
       message.showType = 0

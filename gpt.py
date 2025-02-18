@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 import http.client
 import json
 
@@ -15,8 +14,8 @@ def create_prompt(from_id, to_id, content):
 
     prompt = (
         '以下是女生发给我的消息，请你用温柔、体贴且幽默的语气回复她，'
-        '展现出高情商的男人形象。请确保回复既安慰她又带有轻松的幽默感，'
-        '以缓解她的情绪。请以纯json格式回复我, 三个字段momoid、remoteId、content：\n'
+        '展现出高情商的男人形象。请确保回复既安慰她又带有轻松的幽默感。'
+        '请以纯json格式回复我, 三个字段momoid、remoteId、content：\n'
         f'{str_json}'
     )
     return prompt
@@ -32,12 +31,6 @@ def parse_reply_body(body):
             return None
     return None
 
-@dataclass
-class Message:
-    momo_id: str
-    remote_id: str
-    content: str
-
 class MomoGPT:
     def __init__(self):
         self.base_url = 'chatapi.littlewheat.com'
@@ -48,10 +41,10 @@ class MomoGPT:
     def on(self, event: str, callback):
         self.callbacks[event] = callback
 
-    def post_message(self, message: Message):
-        momoid = message.momo_id
-        remote_id = message.remote_id
-        content = message.content
+    def post_message(self, message):
+        momoid = message['momoid']
+        remote_id = message['remoteId']
+        content = message['content']
         prompt_text = create_prompt(momoid, remote_id, content)
 
         payload = json.dumps({
