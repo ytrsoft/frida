@@ -26,15 +26,15 @@ gpt = MomoGPT()
 def handle_message(message, _):
   payload = message['payload']
   msg_mq.put_nowait(payload)
-  data = payload['data']
-  state = payload['type']
-  if state == 1:
-    replay = {
-      'momoid': data['toId'],
-      'remoteId': data['fromId'],
-      'content': data['content']
-    }
-    gpt.post_message(replay)
+  # data = payload['data']
+  # state = payload['type']
+  # if state == 1:
+  #   replay = {
+  #     'momoid': data['toId'],
+  #     'remoteId': data['fromId'],
+  #     'content': data['content']
+  #   }
+  #   gpt.post_message(replay)
 
 gpt.on('message', gpt_message)
 
@@ -110,7 +110,7 @@ async def on_gpt(websocket: WebSocket):
 async def websocket(websocket: WebSocket):
     await websocket.accept()
     asyncio.create_task(on_rpc(websocket))
-    asyncio.create_task(on_gpt(websocket))
+    # asyncio.create_task(on_gpt(websocket))
     _rpc.exports_sync.init()
     while True:
       data = await websocket.receive_text()

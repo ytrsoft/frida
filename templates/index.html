@@ -82,7 +82,7 @@
                   :class="`w-12 h-12 rounded-full border-2 border-[${chat.remoteUser.sex !== 0 ? '#2d2d2d' : '#ffffff'}]`"
                   :src="`/image/${chat.remoteUser.photos[0]}`"
                 />
-                <div class="w-[20%] max-w-[40%]">
+                <div class="min-w-[20%] max-w-[40%]">
                   <div
                     class="text-[#a1a1a1] flex space-x-1 text-[12px] mb-[10px]"
                   >
@@ -107,7 +107,7 @@
                 </div>
               </div>
               <div v-else class="flex items-start space-x-4 justify-end">
-                <div class="w-[20%] max-w-[40%]">
+                <div class="min-w-[20%] max-w-[40%]">
                   <div
                     class="text-[#a1a1a1] flex justify-end space-x-1 text-[12px] mb-[10px]"
                   >
