@@ -79,14 +79,11 @@ async def websocket(websocket: WebSocket):
     await websocket.accept()
     asyncio.create_task(on_rpc(websocket))
     _rpc.exports_sync.init()
-    try:
-      while True:
-        data = await websocket.receive_text()
-        message = json.loads(data)
-        if message['type'] == 2:
-           _rpc.exports_sync.post(message['data'])
-    except WebSocketDisconnect:
-      await websocket.close()
+    while True:
+      data = await websocket.receive_text()
+      message = json.loads(data)
+      if message['type'] == 2:
+          _rpc.exports_sync.post(message['data'])
 
 if __name__ == '__main__':
     import uvicorn

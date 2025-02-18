@@ -39,11 +39,20 @@ new Vue({
     this.initWS()
   },
   methods: {
+    km(meters) {
+      const km = meters / 1000
+      return km.toFixed(2) + 'km'
+    },
     initWS() {
       this.ws = createWS(this.onMessage)
     },
+    changeItem(id) {
+    this.selectId = id
+    },
     sendMsg() {
       const content = this.$refs.content.value
+      const p = this;
+      debugger
       if (content && this.ws && this.selectId && this.user) {
         const message = {
           content,
@@ -79,9 +88,9 @@ new Vue({
       message.showType = 0
       this.chats.push(message)
       const id = message.remoteUser.id
+      this.selectId = id
       if (!this.ids.includes(id)) {
         this.ids.push(id)
-        this.selectId = id
         this.users.push(message.remoteUser)
       }
     }

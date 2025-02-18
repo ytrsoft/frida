@@ -1,50 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>陌陌消息</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.staticfile.net/vue/2.2.2/vue.min.js"></script>
-  <link rel="stylesheet" href="{{ url_for('static', path='chat.css') }}">
-</head>
-<body>
-  <div id="app" class="p-8 w-screen h-screen flex bg-[#000000] text-[#ffffff]">
-    <div class="flex p-[16px] w-full h-full border border-[#2d2d2d] rounded-[8px]">
-      <div class="flex-[1] pr-[8px]">
-        <div v-for="user in users" :key="user.id" class="p-[8px] flex items-center space-x-4 text-white hover:bg-[#333] rounded-sm cursor-pointer transition duration-300">
-          <img class="w-12 h-12 rounded-full bg-[#fff]" :src="`/image/${user.photos[0]}`" />
-          <div class="text-xl font-medium">[[ user.name ]]</div>
-        </div>
-      </div>
-      <div class="flex-[4] flex flex-col">
-        <div class="flex-1 overflow-y-auto space-y-6">
-          <div v-for="chat in chats" :key="chat.id">
-            <div v-if="chat.showType === 0" class="flex items-start space-x-4">
-              <img class="w-12 h-12 rounded-full bg-[#fff]" :src="`/image/${chat.remoteUser.photos[0]}`" />
-              <div class="bg-[#333] p-4 rounded-lg text-white max-w-[80%]">
-                <p>[[chat.content]]</p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>陌陌消息</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.staticfile.net/vue/2.2.2/vue.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', path='chat.css') }}" />
+  </head>
+  <body>
+    <div
+      id="app"
+      class="p-8 w-screen h-screen flex bg-[#121212] text-[#ffffff]"
+    >
+      <div class="flex w-full h-full border border-[#2d2d2d] rounded-[8px]">
+        <!-- 左侧聊天成员列表 -->
+        <div
+          class="p-[16px] flex flex-col flex-[1] h-full border-r border-[#2d2d2d]"
+        >
+          <div class="flex-none pb-2 pl-[4px]">
+            <div class="text-[#ffffff]">聊天成员</div>
+          </div>
+          <div class="flex-[1] space-y-2 h-[calc(100%)] overflow-y-auto">
+            <div
+              v-for="user in users"
+              :key="user.id"
+              @click="changeItem(user.id)"
+              :class="{
+                'bg-[#2d2d2d] border border-[#2d2d2d]': selectId === user.id,
+                'border border-[#2d2d2d]': selectId !== user.id,
+              }"
+              class="border border-[#2d2d2d] p-[8px] flex items-center space-x-4 rounded-[6px]"
+            >
+              <img
+                :class="`w-12 h-12 rounded-full border-2 border-[${user.sex !== 0 ? '#2d2d2d' : '#ffffff'}]`"
+                :src="`/image/${user.photos[0]}`"
+              />
+              <div class="flex flex-col space-y-2">
+                <div class="flex items-center">
+                  <div class="text-[#ededed]">[[ user.name ]]</div>
+                  <div
+                    class="bg-[#3291ff] text-[#ededed] h-[16px] rounded-[2px] flex px-2 justify-center items-center text-[7px] translate-y-[1px] ml-2"
+                  >
+                    [[ user.age ]]岁
+                  </div>
+                </div>
+                <div class="text-[8px] text-[#a1a1a1]">[[ user.sign ]]</div>
               </div>
-            </div>
-            <div v-else class="flex items-start space-x-4 justify-end">
-              <div class="bg-[#333] p-4 rounded-lg text-white max-w-[80%]">
-                <p>[[chat.content]]</p>
-              </div>
-              <img class="w-12 h-12 rounded-full bg-[#fff]" :src="`/image/${chat.remoteUser.photos[0]}`" />
             </div>
           </div>
         </div>
-        <div class="flex-none mt-6 flex items-center space-x-2">
-          <input ref="content" type="text" class="flex-grow h-[40px] bg-[#1a1a1a] px-[10px] rounded-[4px] text-[#cbcbcb] placeholder:text-[#8f8f8f]" placeholder="请输入消息..." />
-          <button @click="sendMsg" class="border border-[#2d2d2d] w-[90px] h-[40px] bg-[#0a0a0a] text-white text-[14px] rounded-[4px]">发送</button>
+        <!-- 右侧聊天区域 -->
+        <div class="flex-[5] flex flex-col">
+          <div class="flex-1 overflow-y-auto space-y-6 p-[16px]">
+            <div v-for="chat in chats" :key="chat.id">
+              <div
+                v-if="chat.showType === 0"
+                class="flex items-start space-x-4"
+              >
+                <img
+                  :class="`w-12 h-12 rounded-full border-2 border-[${chat.remoteUser.sex !== 0 ? '#2d2d2d' : '#ffffff'}]`"
+                  :src="`/image/${chat.remoteUser.photos[0]}`"
+                />
+                <div class="w-[20%] max-w-[40%]">
+                  <div class="text-[#a1a1a1] flex space-x-1 text-[12px] mb-[10px]">
+                    <div>[[chat.remoteUser.name]]</div>
+                    <div>·</div>
+                    <div>[[chat.remoteUser.constellation]]</div>
+                  </div>
+                  <div
+                    class="border border-[#2d2d2d] rounded-[4px] text-[#fff] text-[12px] px-[8px] py-[16px] w-full"
+                  >
+                    <p>[[chat.content]]</p>
+                  </div>
+                  <div class="text-[#a1a1a1] flex space-x-1 justify-end text-[10px] mt-[4px] pr-1">
+                    <div>[[chat.remoteUser.device]]</div>
+                    <div>·</div>
+                    <div>[[km(chat.distance)]]</div>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="flex items-start space-x-4 justify-end">
+                <div class="w-[20%] max-w-[40%]">
+                  <div class="text-[#a1a1a1]  flex justify-end space-x-1 text-[12px] mb-[10px]">
+                    <div>[[chat.remoteUser.name]]</div>
+                    <div>·</div>
+                    <div>[[chat.remoteUser.constellation]]</div>
+                  </div>
+                  <div
+                  class="border border-[#2d2d2d] rounded-[4px] bg-[#fff] text-[#131313] text-[12px] px-[8px] py-[16px] w-full"
+                >
+                  <p>[[chat.content]]</p>
+                </div>
+                </div>
+                <img
+                  :class="`w-12 h-12 rounded-full border-2 border-[${chat.remoteUser.sex !== 0 ? '#2d2d2d' : '#ffffff'}]`"
+                  :src="`/image/${chat.remoteUser.photos[0]}`"
+                />
+              </div>
+            </div>
+          </div>
+          <div
+            class="flex-none mt-6 flex items-center space-x-2 border-t border-[#2d2d2d] p-[16px]"
+          >
+            <input
+              @keydown.enter="sendMsg"
+              ref="content"
+              type="text"
+              class="flex-grow h-[40px] bg-[#1a1a1a] px-[10px] rounded-[4px] text-[#cbcbcb] placeholder:text-[#8f8f8f]"
+              placeholder="请输入消息..."
+            />
+            <button
+              @click="sendMsg"
+              class="w-[90px] h-[40px] rounded-[4px] bg-[#2e2e2e] text-[#ffffff]"
+            >
+              发送
+            </button>
+          </div>
         </div>
       </div>
-      </div>
-
     </div>
-  </div>
-</body>
-
-
-<script src="{{ url_for('static', path='chat.js') }}"></script>
+  </body>
+  <script src="{{ url_for('static', path='chat.js') }}"></script>
 </html>
