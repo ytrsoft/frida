@@ -5,36 +5,46 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>陌陌消息</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="{{ url_for('static', path='chat.js') }}"></script>
-  <style>
-    button,
-    input {
-      outline: none;
-    }
-
-    ::-webkit-scrollbar {
-      display: none;
-    }
-
-    .highlight {
-      background-color: #444;
-    }
-  </style>
+  <script src="https://cdn.staticfile.net/vue/2.2.2/vue.min.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', path='chat.css') }}">
 </head>
 <body>
-  <div class="h-screen w-screen bg-[#181818] text-[#E4E4E7] p-6 flex">
-    <div class="h-full flex flex-col flex-none w-[250px] bg-[#242424] rounded-l-xl p-4 shadow-lg">
-      <div class="text-lg flex-none font-semibold mb-6 text-[#E4E4E7]">群成员</div>
-      <div id="users" class="space-y-4 overflow-y-scroll flex-grow h-[calc(100%)px]"></div>
-    </div>
-
-    <div class="flex flex-col min-h-full bg-[#1E1E1E] flex-[1] rounded-r-xl p-6">
-      <div id="chat" class="flex-[1] flex flex-col space-y-6 overflow-y-auto pb-4"></div>
-      <div class="h-[70px] flex items-center border-t border-[#444] pt-4">
-        <input id="message" class="flex-1 p-4 rounded-lg bg-[#333333] text-[#E4E4E7] placeholder-[#888] focus:outline-none focus:ring-2 focus:ring-[#3B82F6] transition duration-300" type="text" placeholder="输入消息..." />
-        <button onclick="sendMessage" id="sender" class="ml-4 bg-[#3B82F6] text-white p-4 rounded-lg hover:bg-[#2563EB] transition duration-300">发送</button>
+  <div id="app" class="p-8 w-screen h-screen flex bg-[#000000] text-[#ffffff]">
+    <div class="flex p-[16px] w-full h-full border border-[#2d2d2d] rounded-[8px]">
+      <div class="flex-[1] pr-[8px]">
+        <div v-for="user in users" :key="user.id" class="p-[8px] flex items-center space-x-4 text-white hover:bg-[#333] rounded-sm cursor-pointer transition duration-300">
+          <img class="w-12 h-12 rounded-full bg-[#fff]" :src="`/image/${user.photos[0]}`" />
+          <div class="text-xl font-medium">[[ user.name ]]</div>
+        </div>
       </div>
+      <div class="flex-[4] flex flex-col">
+        <div class="flex-1 overflow-y-auto space-y-6">
+          <div v-for="chat in chats" :key="chat.id">
+            <div v-if="chat.showType === 0" class="flex items-start space-x-4">
+              <img class="w-12 h-12 rounded-full bg-[#fff]" :src="`/image/${chat.remoteUser.photos[0]}`" />
+              <div class="bg-[#333] p-4 rounded-lg text-white max-w-[80%]">
+                <p>[[chat.content]]</p>
+              </div>
+            </div>
+            <div v-else class="flex items-start space-x-4 justify-end">
+              <div class="bg-[#333] p-4 rounded-lg text-white max-w-[80%]">
+                <p>[[chat.content]]</p>
+              </div>
+              <img class="w-12 h-12 rounded-full bg-[#fff]" :src="`/image/${chat.remoteUser.photos[0]}`" />
+            </div>
+          </div>
+        </div>
+        <div class="flex-none mt-6 flex items-center space-x-2">
+          <input ref="content" type="text" class="flex-grow h-[40px] bg-[#1a1a1a] px-[10px] rounded-[4px] text-[#cbcbcb] placeholder:text-[#8f8f8f]" placeholder="请输入消息..." />
+          <button @click="sendMsg" class="border border-[#2d2d2d] w-[90px] h-[40px] bg-[#0a0a0a] text-white text-[14px] rounded-[4px]">发送</button>
+        </div>
+      </div>
+      </div>
+
     </div>
   </div>
 </body>
+
+
+<script src="{{ url_for('static', path='chat.js') }}"></script>
 </html>

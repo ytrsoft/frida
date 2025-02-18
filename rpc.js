@@ -1,9 +1,19 @@
+let LOGIN_USER = null
+const USER_CACHE = {}
+
 const API_BASE = 'https://api.immomo.com'
 const USER_API = `${API_BASE}/v3/user/profile/info`
 
+const TYPES = {
+  INIT: 0,
+  MESSAGE: 1
+}
+
 const PKGS = {
+  IMJ: 'com.immomo.momo.im.e$1',
   IM_APP: 'com.immomo.momo.im.b',
   HASH_MAP: 'java.util.HashMap',
+  ARRAY_LIST: 'java.util.ArrayList',
   HTTP_CLIENT: 'com.immomo.momo.protocol.http.a',
   MSG_SERVICE: 'com.immomo.momo.messages.service.l',
   USER_SERVICE: 'com.immomo.momo.service.user.UserService',
@@ -11,15 +21,23 @@ const PKGS = {
   MSG_SENDER: 'com.immomo.momo.mvp.message.task.c'
 }
 
-let currentUser = {}
-const userCache = {}
-const messageHistory = []
+const serialize = (instance) => {
+  const json = {}
+  const className = instance.getClass()
+  const fields = className.getDeclaredFields()
+  fields.forEach((field) => {
+    field.setAccessible(true)
+    const name = field.getName()
+    const value = field.get(instance)
+    json[name] = value && value.toString()
+  })
+  return json
+}
 
 const postRequest = (url, args) => {
   const HashMap = Java.use(PKGS.HASH_MAP)
   const map = HashMap.$new()
   Object.keys(args).forEach(key => map.put(key, args[key]))
-
   const httpClient = Java.use(PKGS.HTTP_CLIENT).$new()
   return httpClient.doPost(url, map)
 }
@@ -70,62 +88,9 @@ const parseUserProfile = (profile) => {
 }
 
 const getUserProfile = (id) => {
-  if (!id) return {}
   const body = postRequest(USER_API, { remoteid: id })
   const json = JSON.parse(body || '{}')
-  return parseUserProfile(json.data?.profile || {})
-}
-
-const cacheUserInfo = (msg) => {
-  const { mode, fromId } = msg
-  if (mode === 0) {
-    msg.avatar = currentUser.photos[0]
-    msg.name = currentUser.name
-    msg.constellation = currentUser.constellation
-  } else {
-    if (!userCache[fromId]) {
-      userCache[fromId] = getUserProfile(fromId)
-    }
-    const photos = userCache[fromId]?.photos
-    msg.avatar = photos && photos[0]
-    msg.name = userCache[fromId]?.name
-    msg.sex = userCache[fromId]?.sex
-    msg.device = userCache[fromId]?.device
-    msg.constellation = userCache[fromId]?.constellation
-  }
-}
-
-const getCurrentId = () => {
-  const IMApp = Java.use(PKGS.IM_APP)
-  return IMApp.a().c().getId()
-}
-
-const initUser = () => {
-  const id = getCurrentId()
-  currentUser = getUserProfile(id)
-}
-
-const receiveMessage = (callback) => {
-  const MsgService = Java.use(PKGS.MSG_SERVICE)
-  const overload = MsgService.a.overloads[21]
-
-  overload.implementation = function(args) {
-    const message = {
-      msgId: args.msgId.value,
-      msgType: args.contentType.value,
-      distance: args.distance.value,
-      content: args.content.value,
-      toId: args.myMomoId.value,
-      fromId: args?.owner?.value?.getId(),
-      mode: (args?.owner?.value?.getId() === currentUser.id) ? 0 : 1
-    }
-    if (message.msgType == 0) {
-      cacheUserInfo(message)
-      messageHistory.push(message)
-      callback(message)
-    }
-    return this.a(args)
-  }
+  return parseUserProfile(json.data.profile)
 }
 
 const post = (message) => {
@@ -144,32 +109,68 @@ const post = (message) => {
   })
 }
 
-const getCurrentUser = () => {
+const handleMesage = (message, handle) => {
+  const json = serialize(message)
+  const id = json.remoteId
+  const msg = {
+    id: json.msgId,
+    distance: json.distance,
+    content: json.content,
+    type: Number(json.contentType)
+  }
+  // 只有文本模式才回传
+  if (msg.type === 0) {
+    if (!USER_CACHE[id]) {
+      USER_CACHE[id] = getUserProfile(id)
+    }
+    msg.remoteUser = USER_CACHE[id]
+    handle && handle(msg)
+  }
+}
+
+const onMessage = (handle) => {
+  const Im = Java.use(PKGS.IMJ)
+  const List = Java.use(PKGS.ARRAY_LIST)
+  const classes = [
+    'java.lang.String',
+    'android.os.Bundle',
+    'java.lang.Object'
+  ]
+  const overload = Im.a.overload(...classes)
+  overload.implementation = function(...args) {
+    const keys = args[1].keySet().toArray().toString()
+    if (keys.includes('msgs')) {
+      const msgs = args[1].get('msgs')
+      const list = List.$new(msgs)
+      for (let i = 0; i < list.size(); i++) {
+        handleMesage(list.get(i), handle)
+      }
+    }
+    return this.a(...args)
+  }
+}
+
+const init = () => {
   Java.perform(() => {
-    let value
-    Java.perform(() => {
-      value = handle()
-    })
-    return value
+    const IMApp = Java.use(PKGS.IM_APP)
+    const id = IMApp.a().c().getId()
+    if (!LOGIN_USER) {
+      LOGIN_USER = getUserProfile(id)
+      send({ type: TYPES.INIT, data: LOGIN_USER })
+    }
   })
 }
 
 const receive = () => {
   Java.perform(() => {
-    initUser()
-    receiveMessage((msg) => {
-      const message = {
-        currentUser,
-        currentMsg: msg,
-        userGroup: userCache,
-        messageHistory
-      }
-      send(message)
+    onMessage((message) => {
+      send({ type: TYPES.MESSAGE, data: message })
     })
   })
 }
 
 rpc.exports = {
   receive,
-  post
+  post,
+  init
 }
