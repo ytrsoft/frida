@@ -29,7 +29,6 @@ def handle_message(message, _):
   data = payload['data']
   state = payload['type']
   if state == 1:
-    print('请求GPT')
     replay = {
       'momoid': data['toId'],
       'remoteId': data['fromId'],
