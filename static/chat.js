@@ -70,6 +70,7 @@ new Vue({
         })
         this.ws.send(json)
         this.$refs.content.value = ''
+        this.scrollToBottom()
       }
     },
     onMessage(msgList) {
@@ -93,6 +94,13 @@ new Vue({
         this.ids.push(id)
         this.users.push(message.remoteUser)
       }
+      this.scrollToBottom()
+    },
+    scrollToBottom() {
+      const chatsContainer = this.$refs.chatsContainer
+      this.$nextTick(() => {
+        chatsContainer.scrollTop = chatsContainer.scrollHeight
+      })
     }
   }
 })

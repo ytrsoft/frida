@@ -14,7 +14,6 @@
       class="p-8 w-screen h-screen flex bg-[#121212] text-[#ffffff]"
     >
       <div class="flex w-full h-full border border-[#2d2d2d] rounded-[8px]">
-        <!-- 左侧聊天成员列表 -->
         <div
           class="p-[16px] flex flex-col flex-[1] h-full border-r border-[#2d2d2d]"
         >
@@ -50,9 +49,8 @@
             </div>
           </div>
         </div>
-        <!-- 右侧聊天区域 -->
         <div class="flex-[5] flex flex-col">
-          <div class="flex-1 overflow-y-auto space-y-6 p-[16px]">
+          <div ref="chatsContainer" class="flex-1 overflow-y-auto space-y-6 p-[16px]">
             <div v-for="chat in chats" :key="chat.id">
               <div
                 v-if="chat.showType === 0"
@@ -74,8 +72,8 @@
                     <p>[[chat.content]]</p>
                   </div>
                   <div class="text-[#a1a1a1] flex space-x-1 justify-end text-[10px] mt-[4px] pr-1">
-                    <div>[[chat.remoteUser.device]]</div>
-                    <div>·</div>
+                    <div v-if="chat.remoteUser.device">[[chat.remoteUser.device]]</div>
+                    <div v-if="chat.remoteUser.device">·</div>
                     <div>[[km(chat.distance)]]</div>
                   </div>
                 </div>
