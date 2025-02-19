@@ -2,7 +2,6 @@ import json
 import asyncio
 import requests
 import threading
-from utils import parseImage
 from io import BytesIO
 from pathlib import Path
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
@@ -11,8 +10,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from contextlib import asynccontextmanager
+
 from rpc import make_rpc
 from gpt import MomoGPT
+from utils import parseImage, MsgTypes
 
 _rpc = None
 is_gpt = False
@@ -20,7 +21,7 @@ msg_mq = asyncio.Queue(maxsize=1024)
 
 def gpt_message(message):
   replay = {
-    'type': 3,
+    'type': MsgTypes.REPLAY,
     'data': message['content']
   }
   msg_mq.put_nowait(replay)
@@ -33,12 +34,12 @@ def handle_message(message, _):
   data = payload['data']
   state = payload['type']
   msg_mq.put_nowait(payload)
-  print('rpc = > ' + str(is_gpt))
-  if state == 1 and is_gpt:
+  if state == MsgTypes.MESSAGE and is_gpt:
     replay = {
       'momoid': data['toId'],
       'remoteId': data['fromId'],
-      'content': data['content']
+      'content': data['content'],
+      'sex': data['remoteUser']['sex']
     }
     threading.Thread(target=gpt.post_message, args=(replay,)).start()
 
@@ -104,15 +105,17 @@ async def websocket(websocket: WebSocket):
     asyncio.create_task(on_rpc(websocket))
     _rpc.exports_sync.init()
     while True:
-      data = await websocket.receive_text()
-      message = json.loads(data)
-      if message['type'] == 2:
-        _rpc.exports_sync.post(message['data'])
-      if message['type'] == 4:
-        is_gpt = True
-      if message['type'] == 5:
-        is_gpt = False
-      print(is_gpt)
+        try:
+            data = await websocket.receive_text()
+            message = json.loads(data)
+            if message['type'] == MsgTypes.POST:
+                _rpc.exports_sync.post(message['data'])
+            elif message['type'] == MsgTypes.ENABLE:
+                is_gpt = True
+            elif message['type'] == MsgTypes.DISABLE:
+                is_gpt = False
+        except WebSocketDisconnect:
+            break
 
 if __name__ == '__main__':
     import uvicorn

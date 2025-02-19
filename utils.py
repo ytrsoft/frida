@@ -1,3 +1,11 @@
+class MsgTypes:
+    INIT = 0
+    MESSAGE = 1
+    POST = 2
+    REPLAY = 3
+    ENABLE = 4
+    DISABLE = 5
+
 def concat(s: str):
     if not s or len(s) < 4:
         return ''
