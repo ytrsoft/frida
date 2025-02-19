@@ -52,38 +52,16 @@ const parsePopularity = (text) => {
 }
 
 const parseUserProfile = (profile) => {
-  const { likes, followers } = parsePopularity(profile?.user_popular_text || '')
   return {
     id: profile?.momoid,
     name: profile?.name,
-    height: profile?.height,
     age: profile?.age,
     sex: profile?.sex === 'F' ? 0 : 1,
-    sexText: profile?.sex === 'F' ? '女' : '男',
     constellation: profile?.constellation,
     sign: profile?.sign,
     photos: profile?.photos,
-    regTime: profile?.regtime,
-    location: profile?.show_location,
-    onlineStatus: profile?.online_status?.status,
-    onlineType: profile?.profile_onlinetag?.type,
-    level: profile?.growup?.level,
-    vipLevel: profile?.vip?.active_level,
-    svipLevel: profile?.svip?.active_level,
-    authStatus: profile?.realAuth?.status,
     device: profile?.device_info?.device,
-    living: profile?.sp_living?.name,
-    company: profile?.sp_company?.name,
-    workplace: profile?.sp_workplace?.name,
-    hometown: profile?.sp_hometown?.name?.split(' ') || [],
-    job: profile?.sp_industry?.name,
-    school: profile?.sp_school?.map(s => s.name) || [],
-    likes,
-    followers,
-    questionList: (profile?.question_list || []).map(q => ({
-      question: q.question,
-      answer: q.answer,
-    }))
+    popular: profile?.user_popular_text,
   }
 }
 

@@ -15,6 +15,7 @@ from rpc import make_rpc
 from gpt import MomoGPT
 
 _rpc = None
+isGpt = False
 msg_mq = asyncio.Queue(maxsize=1024)
 
 def gpt_message(message):
@@ -32,7 +33,7 @@ def handle_message(message, _):
   data = payload['data']
   state = payload['type']
   msg_mq.put_nowait(payload)
-  if state == 1:
+  if state == 1 and isGpt:
     replay = {
       'momoid': data['toId'],
       'remoteId': data['fromId'],
@@ -105,6 +106,10 @@ async def websocket(websocket: WebSocket):
       message = json.loads(data)
       if message['type'] == 2:
         _rpc.exports_sync.post(message['data'])
+      if message['type'] == 4:
+        is_gpt = True
+      if message['type'] == 5:
+        is_gpt = False
 
 if __name__ == '__main__':
     import uvicorn

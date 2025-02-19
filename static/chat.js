@@ -3,6 +3,16 @@ const MSG_TYPES = {
   MESSAGE: 1,
   POST: 2,
   REPLAY: 3,
+  ENABLE: 4,
+  DISABLE: 5
+}
+
+const UUID = () => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    var r = Math.random() * 16 | 0;
+    var v = (c === 'x' ? r : (r & 0x3 | 0x8))
+    return v.toString(16)
+  })
 }
 
 const createWS = (handle) => {
@@ -29,48 +39,27 @@ new Vue({
   data() {
     return {
       ws: null,
-      selectId: null,
-      user: null,
+      input: '',
+      gpt: false,
+      selectId: 1,
+      user: {},
       ids: [],
-      users: [],
       chats: [],
+      users: []
     }
   },
   mounted() {
     this.initWS()
   },
   methods: {
-    km(meters) {
-      const km = meters / 1000
-      return km.toFixed(2) + 'km'
+    onSelected(id) {
+      this.selectId = id
+    },
+    changeMode() {
+      this.gpt = !this.gpt
     },
     initWS() {
       this.ws = createWS(this.onMessage)
-    },
-    changeItem(id) {
-    this.selectId = id
-    },
-    sendMsg() {
-      const content = this.$refs.content.value
-      if (content && this.ws && this.selectId && this.user) {
-        const message = {
-          content,
-          momoid: this.user.id,
-          remoteId: this.selectId
-        }
-        this.chats.push({
-          showType: 1,
-          content,
-          remoteUser: this.user
-        })
-        const json = JSON.stringify({
-          type: MSG_TYPES.POST,
-          data: message
-        })
-        this.ws.send(json)
-        this.$refs.content.value = ''
-        this.scrollToBottom()
-      }
     },
     onMessage(msgList) {
       msgList.forEach((msg) => {
@@ -107,11 +96,63 @@ new Vue({
       }
       this.scrollToBottom()
     },
-    scrollToBottom() {
-      const chatsContainer = this.$refs.chatsContainer
+    onMessageReplay(content) {
+      message = {
+        remoteUser: this.user,
+        content: content
+      }
       this.$nextTick(() => {
-        chatsContainer.scrollTop = chatsContainer.scrollHeight
+        this.chats.push(message)
+        this.scrollToBottom()
       })
+    },
+    onMsgNextHandle(message) {
+      message.showType = 0
+      this.chats.push(message)
+      const id = message.remoteUser.id
+      this.selectId = id
+      if (!this.ids.includes(id)) {
+        this.ids.push(id)
+        this.users.push(message.remoteUser)
+      }
+      this.scrollToBottom()
+    },
+    sendMessage() {
+      const content = this.input.trim()
+      if (content && this.ws && this.selectId && this.user) {
+        const message = {
+          content,
+          momoid: this.user.id,
+          remoteId: this.selectId
+        }
+        this.chats.push({
+          showType: 1,
+          content,
+          id: UUID(),
+          remoteUser: this.user
+        })
+        const json = JSON.stringify({
+          type: MSG_TYPES.POST,
+          data: message
+        })
+        this.ws.send(json)
+        this.input = ''
+        this.scrollToBottom()
+      }
+    },
+    scrollToBottom() {
+      this.$nextTick(() => {
+        const chatArea = this.$refs.chatArea
+        chatArea.scrollTop = chatArea.scrollHeight
+      })
+    }
+  },
+  computed: {
+    userAvatar() {
+      if (!Array.isArray(this.user.photos)) {
+        return null
+      }
+      return this.user.photos[0]
     }
   }
 })
