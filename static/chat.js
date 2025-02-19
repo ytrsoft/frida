@@ -56,7 +56,15 @@ new Vue({
       this.selectId = id
     },
     changeMode() {
+      let type = MSG_TYPES.ENABLE
       this.gpt = !this.gpt
+      if (!this.gpt) {
+        type = MSG_TYPES.DISABLE
+      }
+      const json = JSON.stringify({
+        type
+      })
+      this.ws.send(json)
     },
     initWS() {
       this.ws = createWS(this.onMessage)
