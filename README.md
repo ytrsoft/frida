@@ -39,7 +39,7 @@ Frida
 
 ```bash
   # 获取超级用户
-  su -
+  su
   # 最高权限
   chmod 777 sudo
   # 启动
