@@ -41,7 +41,7 @@ new Vue({
       ws: null,
       input: '',
       gpt: false,
-      selectId: 1,
+      selectId: null,
       user: {},
       ids: [],
       chats: [],
@@ -106,6 +106,8 @@ new Vue({
     },
     onMessageReplay(content) {
       message = {
+        id: UUID(),
+        showType: 1,
         remoteUser: this.user,
         content: content
       }
