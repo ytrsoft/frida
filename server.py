@@ -17,14 +17,14 @@ from utils import parseImage, MsgTypes
 
 _rpc = None
 is_gpt = False
-msg_mq = asyncio.Queue(maxsize=1024)
+mq = asyncio.Queue(maxsize=1024)
 
 def gpt_message(message):
   replay = {
     'type': MsgTypes.REPLAY,
     'data': message['content']
   }
-  msg_mq.put_nowait(replay)
+  mq.put_nowait(replay)
   _rpc.exports_sync.post(message)
 
 gpt = MomoGPT()
@@ -33,7 +33,7 @@ def handle_message(message, _):
   payload = message['payload']
   data = payload['data']
   state = payload['type']
-  msg_mq.put_nowait(payload)
+  mq.put_nowait(payload)
   if state == MsgTypes.MESSAGE and is_gpt:
     replay = {
       'momoid': data['toId'],
@@ -90,8 +90,8 @@ async def image(id):
 async def on_rpc(websocket: WebSocket):
   while True:
       takes = []
-      while not msg_mq.empty():
-        message = await msg_mq.get()
+      while not mq.empty():
+        message = await mq.get()
         takes.append(message)
       if takes:
         json_data = json.dumps(takes)
