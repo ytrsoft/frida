@@ -48,9 +48,6 @@ class MomoGPT:
             'Content-Type': 'application/json'
         }
 
-        print('启动gpt')
-        print(message)
-
         try:
             conn = http.client.HTTPSConnection(self.base_url)
             conn.request('POST', '/v1/chat/completions', payload, headers)
