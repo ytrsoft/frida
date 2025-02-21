@@ -2,18 +2,22 @@ import json
 import asyncio
 import requests
 import threading
+import warnings
+from urllib3.exceptions import InsecureRequestWarning
 from io import BytesIO
 from pathlib import Path
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from contextlib import asynccontextmanager
 
 from rpc import make_rpc
 from gpt import MomoGPT
 from utils import parseImage, MsgTypes
+
+warnings.simplefilter('ignore', InsecureRequestWarning)
 
 _rpc = None
 is_gpt = False
@@ -82,10 +86,18 @@ async def index(request: Request):
 
 @app.get('/image/{id}')
 async def image(id):
-    url = parseImage(id)
-    response = requests.get(url)
-    image_stream = BytesIO(response.content)
-    return StreamingResponse(image_stream, media_type='image/jpeg')
+    if id != 'null':
+      url = parseImage(id)
+      headers = {
+          'User-Agent': 'MomoChat/9.15.7 Android/12715 (23117RK66C; Android 12; Gapps 0; zh_CN; 1; Redmi)',
+          'Accept-Language': 'zh-CN',
+          'Host': 'img.momocdn.com',
+          'Connection': 'Keep-Alive',
+          'Accept-Encoding': 'gzip'
+      }
+      response = requests.get(url, verify=False)
+      image_stream = BytesIO(response.content)
+      return StreamingResponse(image_stream, media_type='image/jpeg')
 
 async def on_rpc(websocket: WebSocket):
   while True:
