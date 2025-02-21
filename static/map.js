@@ -69,7 +69,7 @@ new Vue({
         momoid: user.momoid,
         remoteId: user.id
       }
-      // await postMessage(sender)
+      await postMessage(sender)
       user.use = true
       this.$set(this.nearlys, index, user)
     },

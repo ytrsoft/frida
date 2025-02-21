@@ -34,19 +34,18 @@ def gpt_message(message):
 gpt = MomoGPT()
 
 def handle_message(message, _):
-    print(message)
-#   payload = message['payload']
-#   data = payload['data']
-#   state = payload['type']
-#   mq.put_nowait(payload)
-#   if state == MsgTypes.MESSAGE and is_gpt:
-#     replay = {
-#       'momoid': data['toId'],
-#       'remoteId': data['fromId'],
-#       'content': data['content'],
-#       'sex': data['remoteUser']['sex']
-#     }
-#     threading.Thread(target=gpt.post_message, args=(replay,)).start()
+  payload = message['payload']
+  data = payload['data']
+  state = payload['type']
+  mq.put_nowait(payload)
+  if state == MsgTypes.MESSAGE and is_gpt:
+    replay = {
+      'momoid': data['toId'],
+      'remoteId': data['fromId'],
+      'content': data['content'],
+      'sex': data['remoteUser']['sex']
+    }
+    threading.Thread(target=gpt.post_message, args=(replay,)).start()
 
 gpt.on('message', gpt_message)
 
