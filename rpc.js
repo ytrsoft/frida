@@ -85,11 +85,14 @@ const getNearly = (lng, lat) => {
   })
   const json = JSON.parse(body || '{}')
   return json.data.lists.map(({ source }) => {
+    const desc = source.signex.desc.split('：')[1]
+    const constellation = (source?.sex === 'F' ? '她是' : '他是') + source.constellation
     return {
+      use: false,
       id: source.momoid,
       age: source.age,
       sex: source?.sex === 'F' ? 0 : 1,
-      sign: source.signex.desc,
+      sign: source.sign || desc || constellation,
       name: source.name,
       avatar: source.photos[0],
       momoid: LOGIN_USER.id

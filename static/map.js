@@ -59,7 +59,7 @@ new Vue({
     })
   },
   methods: {
-    async onSelected(user) {
+    async onSelected(user, index) {
       let msg = '小姐姐，你好🙂'
       if (user.sex !== 0) {
         msg = '小哥哥，你好🙂'
@@ -69,7 +69,9 @@ new Vue({
         momoid: user.momoid,
         remoteId: user.id
       }
-      await postMessage(sender)
+      // await postMessage(sender)
+      user.use = true
+      this.$set(this.nearlys, index, user)
     },
     dispose() {
       if (this.map) {
@@ -176,7 +178,10 @@ new Vue({
         this.markPoint = [
           {
             name: '标记点',
-            value: [...p]
+            value: [...p],
+            itemStyle: {
+              color: '#e6a23c'
+            }
           }
         ]
         this.nearlys = await fetchNearly(...p)
