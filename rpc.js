@@ -72,7 +72,7 @@ const getUserProfile = (id) => {
   return parseUserProfile(json.data.profile)
 }
 
-const _getNearly = (lng, lat) => {
+const getNearly = (lng, lat) => {
   const body = postRequest(NEARLY_API, {
     online_time: '1',
     lat,
@@ -82,13 +82,22 @@ const _getNearly = (lng, lat) => {
     sex: 'F'
   })
   const json = JSON.parse(body || '{}')
-  return json.data
+  return json.data.lists.map(({ source }) => {
+    return {
+      id: source.momoid,
+      age: source.age,
+      sex: source?.sex === 'F' ? 0 : 1,
+      sign: source.sign || source.signex.desc,
+      name: source.name,
+      avatar: source.photos[0]
+    }
+  })
 }
 
-const getNearly = (lng, lat) => {
+const nearly = (lng, lat) => {
   const ref = { value: null }
   Java.perform(() => {
-    ref.value = _getNearly(lng, lat)
+    ref.value = getNearly(lng, lat)
   })
   return ref
 }
@@ -175,5 +184,5 @@ rpc.exports = {
   receive,
   post,
   init,
-  getNearly
+  nearly
 }

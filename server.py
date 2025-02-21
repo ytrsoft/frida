@@ -103,6 +103,11 @@ async def image(id):
       image_stream = BytesIO(response.content)
       return StreamingResponse(image_stream, media_type='image/jpeg')
 
+@app.get('/nearly/{lng}/{lat}')
+async def nearly(lng, lat):
+    result = _rpc.exports_sync.nearly(lng, lat)
+    return JSONResponse(content=result)
+
 async def on_rpc(websocket: WebSocket):
   while True:
       takes = []
