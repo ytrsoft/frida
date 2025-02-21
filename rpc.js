@@ -3,6 +3,7 @@ const USER_CACHE = {}
 
 const API_BASE = 'https://api.immomo.com'
 const USER_API = `${API_BASE}/v3/user/profile/info`
+const NEARLY_API = `${API_BASE}/v2/nearby/people/lists`
 
 const TYPES = {
   INIT: 0,
@@ -69,6 +70,27 @@ const getUserProfile = (id) => {
   const body = postRequest(USER_API, { remoteid: id })
   const json = JSON.parse(body || '{}')
   return parseUserProfile(json.data.profile)
+}
+
+const _getNearly = (lng, lat) => {
+  const body = postRequest(NEARLY_API, {
+    online_time: '1',
+    lat,
+    lng,
+    age_min: '18',
+    age_max: '100',
+    sex: 'F'
+  })
+  const json = JSON.parse(body || '{}')
+  return json.data
+}
+
+const getNearly = (lng, lat) => {
+  const ref = { value: null }
+  Java.perform(() => {
+    ref.value = _getNearly(lng, lat)
+  })
+  return ref
 }
 
 const post = (message) => {
@@ -152,5 +174,6 @@ const receive = () => {
 rpc.exports = {
   receive,
   post,
-  init
+  init,
+  getNearly
 }
