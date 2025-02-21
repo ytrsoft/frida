@@ -19,6 +19,20 @@ const fetchData = async (name) => {
   return await res.json()
 }
 
+const postMessage = async (message) => {
+  const res = await fetch(
+    `/post`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(message)
+    }
+  )
+  return await res.json()
+}
+
 new Vue({
   el: '#app',
   delimiters: ['[[',']]'],
@@ -45,6 +59,18 @@ new Vue({
     })
   },
   methods: {
+    async onSelected(user) {
+      let msg = '小姐姐，你好🙂'
+      if (user.sex !== 0) {
+        msg = '小哥哥，你好🙂'
+      }
+      const sender = {
+        content: msg,
+        momoid: user.momoid,
+        remoteId: user.id
+      }
+      await postMessage(sender)
+    },
     dispose() {
       if (this.map) {
         this.map.dispose()

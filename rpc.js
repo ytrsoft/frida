@@ -19,7 +19,9 @@ const PKGS = {
   MSG_SERVICE: 'com.immomo.momo.messages.service.l',
   USER_SERVICE: 'com.immomo.momo.service.user.UserService',
   MSG_HELPER: 'com.immomo.momo.message.helper.p',
-  MSG_SENDER: 'com.immomo.momo.mvp.message.task.c'
+  MSG_SENDER: 'com.immomo.momo.mvp.message.task.c',
+  MESSAGE: 'com.immomo.momo.service.bean.Message',
+  CODEC: 'com.immomo.momo.util.g'
 }
 
 const serialize = (instance) => {
@@ -73,7 +75,6 @@ const getUserProfile = (id) => {
 }
 
 const getNearly = (lng, lat) => {
-  console.log(lng, lat)
   const body = postRequest(NEARLY_API, {
     online_time: '1',
     lat,
@@ -88,16 +89,27 @@ const getNearly = (lng, lat) => {
       id: source.momoid,
       age: source.age,
       sex: source?.sex === 'F' ? 0 : 1,
-      sign: source.signex.desc.split('：')[1].trim(),
+      sign: source.signex.desc,
       name: source.name,
-      avatar: source.photos[0]
+      avatar: source.photos[0],
+      momoid: LOGIN_USER.id
     }
   })
+}
+
+const initLoginEnv = () => {
+  const IMApp = Java.use(PKGS.IM_APP)
+  const id = IMApp.a().c().getId()
+  if (!LOGIN_USER) {
+    LOGIN_USER = getUserProfile(id)
+    send({ type: TYPES.INIT, data: LOGIN_USER })
+  }
 }
 
 const nearly = (lng, lat) => {
   const ref = { value: null }
   Java.perform(() => {
+    initLoginEnv()
     ref.value = getNearly(lng, lat)
   })
   return ref
@@ -105,18 +117,37 @@ const nearly = (lng, lat) => {
 
 const post = (message) => {
   Java.perform(() => {
+    let msg
     const MessageSender = Java.use(PKGS.MSG_SENDER)
     const MessageHelper = Java.use(PKGS.MSG_HELPER)
     const UserService = Java.use(PKGS.USER_SERVICE)
     const US = UserService.getInstance()
     const owner = US.get(message.momoid)
     const remote = US.get(message.remoteId)
-    const helper = MessageHelper.a()
-    const msg = helper.a(message.content, remote, null, 1)
-    msg.owner.value = owner
+    if (remote != null) {
+      const helper = MessageHelper.a()
+      msg = helper.a(message.content, remote, null, 1)
+      msg.owner.value = owner
+    } else {
+      msg = newMessage(message, owner)
+    }
     const sender = MessageSender.$new()
     sender.b(msg)
   })
+}
+
+const newMessage = (message, owner) => {
+  const AppCodec = Java.use(PKGS.CODEC)
+  const Message = Java.use(PKGS.MESSAGE)
+  const msg = Message.$new()
+  msg.content.value = message.content
+  msg.remoteId.value = message.remoteId
+  const messageTime = AppCodec.c()
+  msg.customBubbleStyle.value = ''
+  msg.messageTime.value = messageTime
+  msg.msgId.value = AppCodec.a(message.momoid, message.content, message.remoteId, messageTime)
+  msg.owner.value = owner
+  return msg
 }
 
 const handleMesage = (message, handle) => {
@@ -164,12 +195,7 @@ const onMessage = (handle) => {
 
 const init = () => {
   Java.perform(() => {
-    const IMApp = Java.use(PKGS.IM_APP)
-    const id = IMApp.a().c().getId()
-    if (!LOGIN_USER) {
-      LOGIN_USER = getUserProfile(id)
-      send({ type: TYPES.INIT, data: LOGIN_USER })
-    }
+    initLoginEnv()
   })
 }
 

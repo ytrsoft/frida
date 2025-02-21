@@ -60,7 +60,7 @@
         <div
           v-for="user in nearlys"
           :key="user.id"
-          @click="onSelected(user.id)"
+          @click="onSelected(user)"
           class="flex items-center p-3 bg-[var(--hover-bg)] rounded-xl cursor-pointer">
           <img
             :src="`/image/${user.avatar}`"
