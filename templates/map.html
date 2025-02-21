@@ -1,126 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>定位系统</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='chat.css') }}" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.staticfile.net/vue/2.2.2/vue.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2.0.9/dist/echarts-gl.min.js"></script>
-  </head>
-  <body>
-    <div
-      id="app"
-      class="flex w-screen h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]"
-    >
-      <div class="flex flex-[4] flex-col shadow-right">
-        <div class="h-[48px] flex flex-none items-center">
-          <div
-            class="h-[48px] flex items-center justify-between flex-1 pl-4 text-white"
-          >
-            <div class="flex">
-              <button @click="goBack" class="mr-4">
-                <svg
-                  t="1740132275887"
-                  class="icon"
-                  viewBox="0 0 1025 1024"
-                  version="1.1"
-                  xmlns="http://www.w3.org/2000/svg"
-                  p-id="2671"
-                  width="22"
-                  height="22"
-                >
-                  <path
-                    d="M533.353412 682.285176c0-0.030118 0.060235-0.060235 0.060235-0.090353C533.172706 682.194824 533.142588 682.224941 533.353412 682.285176zM40.176941 555.008l314.398118 314.398118c27.045647 27.045647 70.927059 27.045647 97.942588 0 27.045647-26.985412 27.045647-70.866824 0-97.912471l-196.186353-196.216471 665.630118 0c38.249412 0 69.240471-31.021176 69.240471-69.240471 0-38.279529-31.021176-69.270588-69.240471-69.270588L256.361412 436.766118l196.186353-196.186353c27.045647-27.015529 27.045647-70.927059 0-97.942588C439.024941 129.114353 421.285647 122.337882 403.546353 122.337882c-17.709176 0-35.448471 6.776471-48.941176 20.299294L40.176941 457.065412C13.101176 484.111059 13.101176 527.932235 40.176941 555.008z"
-                    fill="#ffffff"
-                    p-id="2672"
-                  ></path>
-                </svg>
-              </button>
-
-              <div class="flex items-center">
-                <span
-                  v-if="history.length === 0"
-                  class="text-[var(--text-secondary)] cursor-default"
-                >
-                  中国
-                </span>
-                <span
-                  v-else
-                  @click="itemClick(-1)"
-                  class="text-blue-600 cursor-pointer hover:text-blue-600"
-                >
-                  中国
-                </span>
-                <div
-                  v-for="(item, index) in history"
-                  :key="item.adcode"
-                  class="flex items-center text-sm"
-                >
-                  <span class="text-[var(--text-secondary)] px-2">/</span>
-                  <span
-                    v-if="index === history.length - 1"
-                    class="text-[var(--text-secondary)] cursor-default"
-                  >
-                    [[ item.name ]]
-                  </span>
-                  <span
-                    v-else
-                    @click="itemClick(index)"
-                    class="text-blue-600 cursor-pointer hover:text-blue-600"
-                  >
-                    [[ item.name ]]
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div class="flex items-center space-x-2 pr-4">
-              <div
-                @click="changeMode"
-                class="w-4 h-4 flex items-center justify-center border-[1px] border-[var(--text-secondary)] rounded-[2px] transition-colors cursor-pointer"
-              >
-                <div
-                  v-if="locked"
-                  class="w-2 h-2 bg-[var(--text-primary)]"
-                ></div>
-              </div>
-              <label class="text-sm text-[var(--text-primary)] cursor-pointer"
-                >锁住</label
-              >
-            </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>定位系统</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='chat.css') }}" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.staticfile.net/vue/2.2.2/vue.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2.0.9/dist/echarts-gl.min.js"></script>
+</head>
+<body>
+  <div id="app" class="flex w-screen h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
+    <div class="flex-[4] flex flex-col shadow-right">
+      <div class="h-12 flex items-center justify-between px-4">
+        <div class="flex items-center space-x-4">
+          <button @click="goBack" class="text-white hover:text-gray-300">
+            <svg viewBox="0 0 1025 1024" fill="currentColor" width="22" height="22">
+              <path d="M533.353412 682.285176c0-0.030118 0.060235-0.060235 0.060235-0.090353C533.172706 682.194824 533.142588 682.224941 533.353412 682.285176zM40.176941 555.008l314.398118 314.398118c27.045647 27.045647 70.927059 27.045647 97.942588 0 27.045647-26.985412 27.045647-70.866824 0-97.912471l-196.186353-196.216471 665.630118 0c38.249412 0 69.240471-31.021176 69.240471-69.240471 0-38.279529-31.021176-69.270588-69.240471-69.270588L256.361412 436.766118l196.186353-196.186353c27.045647-27.015529 27.045647-70.927059 0-97.942588C439.024941 129.114353 421.285647 122.337882 403.546353 122.337882c-17.709176 0-35.448471 6.776471-48.941176 20.299294L40.176941 457.065412C13.101176 484.111059 13.101176 527.932235 40.176941 555.008z"></path>
+            </svg>
+          </button>
+          <div class="flex items-center space-x-2">
+            <span v-if="history.length === 0" class="text-[var(--text-secondary)]">中国</span>
+            <span v-else @click="itemClick(-1)" class="text-blue-600 hover:text-blue-700 cursor-pointer">中国</span>
+            <template v-for="(item, index) in history">
+              <span class="text-[var(--text-secondary)]">/</span>
+              <span v-if="index === history.length - 1" class="text-[var(--text-secondary)]">[[ item.name ]]</span>
+              <span v-else @click="itemClick(index)" class="text-blue-600 hover:text-blue-700 cursor-pointer">[[ item.name ]]</span>
+            </template>
           </div>
         </div>
-        <div class="flex-1 shadow-top">
-          <div ref="mapBox" class="w-full h-full"></div>
+        <div class="flex items-center space-x-2">
+          <div @click="changeMode" class="w-4 h-4 flex items-center justify-center border border-[var(--text-secondary)] rounded-sm cursor-pointer">
+            <div v-if="locked" class="w-2 h-2 bg-[var(--text-primary)]"></div>
+          </div>
+          <label class="text-sm text-[var(--text-primary)] cursor-pointer">锁住</label>
         </div>
       </div>
-      <div class="flex-1 flex">
-        <div class="p-4">
-          <div v-if="point" class="flex space-x-2">
-            <svg
-              t="1740149207671"
-              class="icon"
-              viewBox="0 0 1024 1024"
-              version="1.1"
-              xmlns="http://www.w3.org/2000/svg"
-              p-id="3508"
-              width="22"
-              height="22"
-            >
-              <path
-                d="M512 128c169.6 0 308 138.4 308 308 0 81.6-31.2 158.4-88.8 216l-4.8 4L512 869.6 298.4 656.8l-4.8-4.8c-57.6-57.6-88.8-134.4-88.8-216C204 266.4 342.4 128 512 128m0-64C306.4 64 140 230.4 140 436c0 101.6 40.8 194.4 107.2 261.6L512 960l264-263.2c66.4-67.2 107.2-159.2 107.2-261.6C884 230.4 717.6 64 512 64z m0 192c73.6 0 132.8 62.4 128 137.6-4.8 63.2-55.2 113.6-118.4 118.4-74.4 5.6-137.6-53.6-137.6-128 0-70.4 57.6-128 128-128"
-                p-id="3509"
-                fill="#ffffff"
-              ></path>
-            </svg>
-            <div>[[point.lng]], [[point.lat]]</div>
+      <div class="flex-1 shadow-top">
+        <div ref="mapBox" class="w-full h-full"></div>
+      </div>
+    </div>
+    <div class="flex flex-col flex-[1]">
+      <div class="text-[var(--text-secondary)] flex-none px-[16px] h-[48px] flex items-center">
+        <div v-if="point" class="flex space-x-2">
+          <svg viewBox="0 0 1024 1024" fill="currentColor" width="22" height="22">
+            <path d="M512 128c169.6 0 308 138.4 308 308 0 81.6-31.2 158.4-88.8 216l-4.8 4L512 869.6 298.4 656.8l-4.8-4.8c-57.6-57.6-88.8-134.4-88.8-216C204 266.4 342.4 128 512 128m0-64C306.4 64 140 230.4 140 436c0 101.6 40.8 194.4 107.2 261.6L512 960l264-263.2c66.4-67.2 107.2-159.2 107.2-261.6C884 230.4 717.6 64 512 64z m0 192c73.6 0 132.8 62.4 128 137.6-4.8 63.2-55.2 113.6-118.4 118.4-74.4 5.6-137.6-53.6-137.6-128 0-70.4 57.6-128 128-128"></path>
+          </svg>
+          <div>
+            经度([[point.lng]])
           </div>
-          <div v-else>附近人</div>
+          <div>
+            纬度([[point.lat]])
+          </div>
+        </div>
+        <div v-else class="text-[var(--text-secondary)]">附近人</div>
+      </div>
+      <div class="flex-1 overflow-y-auto space-y-2 pl-[16px] pb-[16px]">
+        <div
+          v-for="user in nearlys"
+          :key="user.id"
+          @click="onSelected(user.id)"
+          class="flex items-center p-3 bg-[var(--hover-bg)] rounded-xl cursor-pointer">
+          <img
+            :src="`/image/${user.avatar}`"
+            :class="`w-12 h-12 rounded-full border-2 ${user.sex !== 0 ? 'border-[var(--color-boy)]' : 'border-[var(--color-girl)]'}`"
+          />
+          <div class="flex flex-col ml-3 flex-1">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-medium">[[ user.name ]]</h3>
+              <span class="text-xs text-[var(--text-secondary)]">[[ user.age ]]岁</span>
+            </div>
+            <p class="text-xs text-[var(--text-secondary)]">[[ user.sign ]]</p>
+          </div>
         </div>
       </div>
     </div>
-  </body>
-  <script src="{{ url_for('static', path='map.js') }}"></script>
+  </div>
+</body>
+<script src="{{ url_for('static', path='map.js') }}"></script>
 </html>

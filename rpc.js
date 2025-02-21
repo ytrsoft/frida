@@ -73,6 +73,7 @@ const getUserProfile = (id) => {
 }
 
 const getNearly = (lng, lat) => {
+  console.log(lng, lat)
   const body = postRequest(NEARLY_API, {
     online_time: '1',
     lat,
@@ -87,7 +88,7 @@ const getNearly = (lng, lat) => {
       id: source.momoid,
       age: source.age,
       sex: source?.sex === 'F' ? 0 : 1,
-      sign: source.sign || source.signex.desc,
+      sign: source.signex.desc.split('：')[1].trim(),
       name: source.name,
       avatar: source.photos[0]
     }

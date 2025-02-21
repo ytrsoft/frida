@@ -4,6 +4,14 @@ const getVar = (name) => {
     .trim()
 }
 
+const fetchNearly = async (lng, lat) => {
+  const res = await fetch(
+    `/nearly/${lng}/${lat}`
+  )
+  const json = await res.json()
+  return json.value
+}
+
 const fetchData = async (name) => {
   const res = await fetch(
     `https://geo.datav.aliyun.com/areas_v3/bound/${name}.json`
@@ -16,14 +24,14 @@ new Vue({
   delimiters: ['[[',']]'],
   data() {
     return {
-      pos: null,
       point: null,
       map: null,
       name: '100000_full',
       cache: [],
       history: [],
+      nearlys: [],
       markPoint: [],
-      locked: false
+      locked: true
     }
   },
   beforeDestroy() {
@@ -138,7 +146,6 @@ new Vue({
         const p = this.map.convertFromPixel('geo', [
           offsetX, offsetY
         ])
-        this.pos = { lng: p[0], lat: p[1] }
         this.point = { lng: parseInt(p[0]), lat: parseInt(p[1]) }
         this.markPoint = [
           {
@@ -146,6 +153,7 @@ new Vue({
             value: [...p]
           }
         ]
+        this.nearlys = await fetchNearly(...p)
         await this.renderMap()
       } else {
         const current = this.cache.find((c) => c.name === name)
