@@ -20,13 +20,13 @@ from utils import parseImage, MsgTypes
 warnings.simplefilter('ignore', InsecureRequestWarning)
 
 _rpc = None
-is_gpt = False
+is_gpt = True
 mq = asyncio.Queue(maxsize=1024)
 
 def gpt_message(message):
   replay = {
     'type': MsgTypes.REPLAY,
-    'data': message['content']
+    'data': message
   }
   mq.put_nowait(replay)
   _rpc.exports_sync.post(message)

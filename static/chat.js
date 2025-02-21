@@ -40,7 +40,7 @@ new Vue({
     return {
       ws: null,
       input: '',
-      gpt: false,
+      gpt: true,
       selectId: null,
       user: {},
       ids: [],
@@ -104,10 +104,12 @@ new Vue({
       }
       this.scrollToBottom()
     },
-    onMessageReplay(content) {
+    onMessageReplay({ content, remoteId }) {
+      const replayUser = this.users.find((u) => u.id === remoteId)
       message = {
         id: UUID(),
         showType: 1,
+        replayUser,
         remoteUser: this.user,
         content: content
       }
@@ -154,6 +156,25 @@ new Vue({
       this.$nextTick(() => {
         const chatArea = this.$refs.chatArea
         chatArea.scrollTop = chatArea.scrollHeight
+      })
+    },
+    replayUser(id) {
+      if (!this.user) {
+        return {}
+      }
+      return this.users.find((u) => u.id === id)
+    }
+  },
+  watch: {
+    selectId(newId) {
+      this.$nextTick(() => {
+        const selectedElement = this.$refs[`user-${newId}`][0]
+        if (selectedElement) {
+          selectedElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          })
+        }
       })
     }
   },
