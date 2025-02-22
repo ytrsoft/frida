@@ -34,9 +34,7 @@ def gpt_message(message):
 gpt = MomoGPT()
 
 def handle_message(message, _):
-  if isinstance(message, str):
-    print(message)
-  else:
+  if isinstance(message, dict) and 'payload' in message:
     payload = message['payload']
     data = payload['data']
     state = payload['type']
@@ -49,6 +47,9 @@ def handle_message(message, _):
             'sex': data['remoteUser']['sex']
         }
         threading.Thread(target=gpt.post_message, args=(replay,)).start()
+  else:
+    print(message)
+
 
 gpt.on('message', gpt_message)
 
