@@ -59,19 +59,17 @@ new Vue({
     })
   },
   methods: {
-    async onSelected(user, index) {
-      let msg = '小姐姐，你好🙂'
-      if (user.sex !== 0) {
-        msg = '小哥哥，你好🙂'
+    onSelected(user, index) {
+      if (!user.use) {
+        const sender = {
+          content: `小${user.sex !== 0 ? '哥哥' : '姐姐'}，你好🙂`,
+          momoid: user.momoid,
+          remoteId: user.id
+        }
+        postMessage(sender)
+        user.use = true
+        this.$set(this.nearlys, index, user)
       }
-      const sender = {
-        content: msg,
-        momoid: user.momoid,
-        remoteId: user.id
-      }
-      await postMessage(sender)
-      user.use = true
-      this.$set(this.nearlys, index, user)
     },
     dispose() {
       if (this.map) {
