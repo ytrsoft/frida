@@ -76,7 +76,7 @@
           </div>
           <div class="flex-1 overflow-y-auto p-4 space-y-4 bg-[var(--bg-secondary)] shadow-top" ref="chatArea">
             <transition-group name="fade">
-              <div v-for="chat in chats" :key="chat.id" class="flex justify-end flex space-x-3">
+              <div v-for="chat in chats" :key="chat.id" class="flex justify-end flex space-x-3 mb-4">
                 <img v-if="chat.showType === 0" class="w-9 h-9 flex-none rounded-full self-end border-2" :class="chat.remoteUser.sex !== 0 ? 'border-[var(--color-boy)]' : 'border-[var(--color-girl)]'" :src="`/image/${chat.remoteUser.avatar}`"/>
                 <div :class="`flex flex-1 ${chat.showType !== 0 && 'justify-end'}`">
                   <div class="w-[42%]">
