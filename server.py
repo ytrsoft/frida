@@ -34,7 +34,7 @@ def gpt_message(message):
 gpt = MomoGPT()
 
 def handle_message(message, _):
-  if not isinstance(message, dict) or 'payload' not in message:
+  if isinstance(message, str):
     print(message)
   else:
     payload = message['payload']
@@ -43,10 +43,10 @@ def handle_message(message, _):
     mq.put_nowait(payload)
     if state == MsgTypes.MESSAGE and is_gpt:
         replay = {
-        'momoid': data['toId'],
-        'remoteId': data['fromId'],
-        'content': data['content'],
-        'sex': data['remoteUser']['sex']
+            'momoid': data['toId'],
+            'remoteId': data['fromId'],
+            'content': data['content'],
+            'sex': data['remoteUser']['sex']
         }
         threading.Thread(target=gpt.post_message, args=(replay,)).start()
 
@@ -95,13 +95,6 @@ async def index(request: Request):
 async def image(id):
     if id != 'null':
       url = parseImage(id)
-      headers = {
-          'User-Agent': 'MomoChat/9.15.7 Android/12715 (23117RK66C; Android 12; Gapps 0; zh_CN; 1; Redmi)',
-          'Accept-Language': 'zh-CN',
-          'Host': 'img.momocdn.com',
-          'Connection': 'Keep-Alive',
-          'Accept-Encoding': 'gzip'
-      }
       response = requests.get(url, verify=False)
       image_stream = BytesIO(response.content)
       return StreamingResponse(image_stream, media_type='image/jpeg')

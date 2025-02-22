@@ -8,8 +8,8 @@ const MSG_TYPES = {
 }
 
 const UUID = () => {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    var r = Math.random() * 16 | 0;
+  return 'xxxxxxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    var r = Math.random() * 16 | 0
     var v = (c === 'x' ? r : (r & 0x3 | 0x8))
     return v.toString(16)
   })
@@ -132,23 +132,26 @@ new Vue({
     sendMessage() {
       const content = this.input.trim()
       if (content && this.ws && this.selectId && this.user) {
+        const replayUser = this.users.find((u) => u.id === this.selectId)
         const message = {
           content,
           momoid: this.user.id,
           remoteId: this.selectId
         }
-        this.chats.push({
+        const p = {
           showType: 1,
           content,
           id: UUID(),
+          replayUser,
           remoteUser: this.user
-        })
+        }
         const json = JSON.stringify({
           type: MSG_TYPES.POST,
           data: message
         })
         this.ws.send(json)
         this.input = ''
+        this.chats.push(p)
         this.scrollToBottom()
       }
     },
@@ -158,12 +161,6 @@ new Vue({
         chatArea.scrollTop = chatArea.scrollHeight
       })
     },
-    replayUser(id) {
-      if (!this.user) {
-        return {}
-      }
-      return this.users.find((u) => u.id === id)
-    }
   },
   watch: {
     selectId(newId) {
@@ -176,14 +173,6 @@ new Vue({
           })
         }
       })
-    }
-  },
-  computed: {
-    userAvatar() {
-      if (!Array.isArray(this.user.photos)) {
-        return null
-      }
-      return this.user.photos[0]
     }
   }
 })

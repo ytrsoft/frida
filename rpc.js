@@ -62,7 +62,7 @@ const parseUserProfile = (profile) => {
     sex: profile?.sex === 'F' ? 0 : 1,
     constellation: profile?.constellation,
     sign: profile?.sign,
-    photos: profile?.photos,
+    avatar: profile?.photos[0],
     device: profile?.device_info?.device,
     popular: profile?.user_popular_text,
   }

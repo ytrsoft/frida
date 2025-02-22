@@ -59,7 +59,6 @@ class MomoGPT:
                 ai_replay = result['choices'][0]['message']['content']
                 self.history[history_key].append({'role': 'user', 'content': content})
                 self.history[history_key].append({'role': 'assistant', 'content': ai_replay})
-
                 if 'message' in self.callbacks:
                     message['content'] = ai_replay
                     del message['sex']
