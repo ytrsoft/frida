@@ -34,7 +34,7 @@ def gpt_message(message):
 gpt = MomoGPT()
 
 def handle_message(message, _):
-  if not isinstance(message, dict):
+  if not isinstance(message, dict) or 'payload' not in message:
     print(message)
   else:
     payload = message['payload']

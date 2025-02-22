@@ -81,7 +81,8 @@ const getNearly = (lng, lat) => {
     lng,
     age_min: '18',
     age_max: '100',
-    sex: LOGIN_USER.sex !== 0 ? 'F' : 'M'
+    // sex: LOGIN_USER.sex !== 0 ? 'F' : 'M'
+    sex: 'F'
   })
   const json = JSON.parse(body || '{}')
   return json.data.lists.map(({ source }) => {

@@ -61,8 +61,8 @@
           v-for="(user, index) in nearlys"
           :key="user.id"
           @click="onSelected(user, index)"
-          class="flex items-center p-3 bg-[var(--hover-bg)] rounded-xl cursor-pointer"
-          :class="`${user.use && 'border-2 border-[var(--border-color-success)]'}`">
+          class="flex items-center p-3 rounded-[4px] cursor-pointer"
+          :class="`${!user.use ? 'bg-[var(--hover-bg)]' : 'bg-[var(--hover-bg-secondary)]'}`">
           <img
             :src="`/image/${user.avatar}`"
             :class="`w-12 h-12 rounded-full border-2 ${user.sex !== 0 ? 'border-[var(--color-boy)]' : 'border-[var(--color-girl)]'}`"
