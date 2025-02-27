@@ -13,13 +13,13 @@ from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from contextlib import asynccontextmanager
 
-from rpc import make_rpc
+from rpc import create_momo
 from gpt import MomoGPT
 from utils import parseImage, MsgTypes
 
 warnings.simplefilter('ignore', InsecureRequestWarning)
 
-_rpc = None
+momo = None
 is_gpt = True
 mq = asyncio.Queue(maxsize=1024)
 
@@ -29,7 +29,7 @@ def gpt_message(message):
     'data': message
   }
   mq.put_nowait(replay)
-  _rpc.exports_sync.post(message)
+  momo.rpc.post(message)
 
 gpt = MomoGPT()
 
@@ -54,10 +54,10 @@ def handle_message(message, _):
 gpt.on('message', gpt_message)
 
 async def consume():
-    global _rpc
-    _rpc = make_rpc()
-    _rpc.on('message', handle_message)
-    _rpc.exports_sync.receive()
+    global momo
+    momo = create_momo()
+    momo.on('message', handle_message)
+    momo.rpc.receive()
 
 @asynccontextmanager
 async def lifespan(_):
@@ -102,16 +102,16 @@ async def image(id):
 
 @app.get('/nearly/{lng}/{lat}')
 async def nearly(lng, lat):
-    result = _rpc.exports_sync.nearly(lng, lat)
+    result = momo.rpc.nearly(lng, lat)
     return JSONResponse(content=result)
 
 @app.post('/post')
 async def post(body: dict):
-    _rpc.exports_sync.post(body)
+    momo.rpc.post(body)
     return JSONResponse(content=body)
 
 
-async def on_rpc(websocket: WebSocket):
+async def onmomo(websocket: WebSocket):
   while True:
       takes = []
       while not mq.empty():
@@ -126,20 +126,20 @@ async def on_rpc(websocket: WebSocket):
 async def websocket(websocket: WebSocket):
     global is_gpt
     await websocket.accept()
-    asyncio.create_task(on_rpc(websocket))
-    _rpc.exports_sync.init()
+    asyncio.create_task(onmomo(websocket))
+    momo.rpc.init()
     while True:
         try:
             data = await websocket.receive_text()
             message = json.loads(data)
             if message['type'] == MsgTypes.POST:
-                _rpc.exports_sync.post(message['data'])
+                momo.rpc.post(message['data'])
             elif message['type'] == MsgTypes.ENABLE:
                 is_gpt = True
             elif message['type'] == MsgTypes.DISABLE:
                 is_gpt = False
         except WebSocketDisconnect:
-            break
+            pass
 
 if __name__ == '__main__':
     import uvicorn

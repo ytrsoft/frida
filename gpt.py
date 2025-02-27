@@ -17,7 +17,7 @@ class MomoGPT:
         title, pronoun = gender_map.get(sex, ['朋友', '它'])
 
         if not history or len(history) == 0:
-            prompt = f'现在你是{title}的真实好友，用{pronoun}常用的说话方式回复一条消息。请遵守以下规则：\n1. 仅输出1句话，12-18个汉字\n2. 语气自然，避免使用过于正式或模板化的表达\n3. 根据消息内容和上下文关联具体情境\n对方最新消息：「{content}」\n立即生成单句回复：'
+            prompt = f'现在你是{title}的真实好友，用{pronoun}常用的说话方式回复一条消息。请遵守以下规则：\n1. 仅输出1句话，12-18个汉字\n2. 语气自然，避免使用过于正式或模板化的表达，请勿暴露自己AI、人机、助手等行为.\n3. 根据消息内容和上下文关联具体情境\n对方最新消息：「{content}」\n立即生成单句回复：'
         else:
             last_message = history[-1]['content']
             prompt = f'{last_message}\n{pronoun}回复，立即生成单句回复：\n对方最新消息：「{content}」'
@@ -33,7 +33,7 @@ class MomoGPT:
         history_key = f'{momoid}_{remote_id}'
 
         if history_key not in self.history:
-            self.history[history_key] = [{'role': 'system', 'content': 'You are a helpful assistant.'}]
+            self.history[history_key] = []
 
         prompt_text, current_history = self.create_prompt(content, sex, self.history[history_key])
 
