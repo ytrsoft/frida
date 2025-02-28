@@ -8,21 +8,21 @@
 // .end method
 
 // {
-//   "username": "momoid",
-//   "session": "login session",
+//   "username": "id",
+//   "session": "?",
 //   "resource": "android",
 //   "cflag": "24b",
-//   "uid": "ea783e5dfa32dd306b0861d2e6d7f4ef",
+//   "uid": "?",
 //   "version": 12715,
 //   "extraData": {
-//     "abtest": "nearbypeopleliveexp-kmjyjy_blank;aisayhi-bmhtje_blank;test-rsxyxo_blank;morenew-wkhqld_A;microcosm-jtgdzn_blank;active-wklfmo_blank;location-vwzlkp_A;nearbyfeedlive-mclxen_blank"
+//     "abtest": "?"
 //   }
 // }
 
 //  adb logcat -s SHELL
 
 // const-string v0, "SHELL"
-// invoke-virtual {p1}, Lcom/immomo/im/AuthInfo;->toString()Ljava/lang/String;
+// invoke-virtual {p1}, Lcom/immomo/im/X;->toString()Ljava/lang/String;
 // move-result-object v1
 // invoke-static {v0, v1}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
 
