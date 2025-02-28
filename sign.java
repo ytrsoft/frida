@@ -19,6 +19,13 @@
 //   }
 // }
 
+//  adb logcat -s SHELL
+
+// const-string v0, "SHELL"
+// invoke-virtual {p1}, Lcom/immomo/im/AuthInfo;->toString()Ljava/lang/String;
+// move-result-object v1
+// invoke-static {v0, v1}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
+
 public static String O() throws Exception {
   try {
       Signature S = S();
