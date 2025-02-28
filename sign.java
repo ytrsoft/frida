@@ -1,4 +1,12 @@
 /*生成apk签名*/
+// .method public static O()Ljava/lang/String;
+//     .registers 1
+
+//     const-string v0, "apksign"
+
+//     return-object v0
+// .end method
+
 public static String O() throws Exception {
   try {
       Signature S = S();
