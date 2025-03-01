@@ -125,3 +125,7 @@ appium --allow-cors --port 4725
 appium driver install uiautomator2
 ```
 ###### Start Session 启动
+
+###### 魔改frida 过检测
+
+> florida-server-16.6.6-android-arm64.gz
