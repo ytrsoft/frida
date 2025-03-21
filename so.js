@@ -25,7 +25,7 @@ const socket = (fd) => {
   if (type !== null) {
     const peer = Socket.peerAddress(fd)
     const local = Socket.localAddress(fd)
-    if (peer.ip && peer.port && local.ip && local.port) {
+    if (local.ip && local.port && peer.ip && peer.port) {
       console.log(`${local.ip}:${local.port} => ${peer.ip}:${peer.port}`)
     }
   }
