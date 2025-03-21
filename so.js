@@ -16,9 +16,15 @@ const attachLibc = (name, handle) => {
   })
 }
 
+const charLine = (char) => {
+  return Array(100).fill(char).join('')
+}
+
 attachLibc('sendto', (ctx) => {
   const size = ctx.arg2.toInt32()
   if (size > 0) {
+    console.log(charLine('>'))
     console.log(hexdump(ctx.arg1, { length: size }))
+    console.log(charLine('<'))
   }
 })
