@@ -15,7 +15,9 @@ Frida
   # 查看进程包名
   frida-ps -Ua
   # 启动脚本 进程ID 脚本文件
-  frida -U -p 6033 -l http.js
+  frida -U -p 21847 -l script.js
+  # spawn模式启动
+  frida -U -f com.immomo.momo -l script.js
 ```
 
 #### Shell命令
