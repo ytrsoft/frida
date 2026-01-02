@@ -131,3 +131,8 @@ appium driver install uiautomator2
 ###### 魔改frida 过检测
 
 > florida-server-16.6.6-android-arm64.gz
+
+###### 填充指令
+```bash
+# FX F7 => 00 BF 00 BF
+```
